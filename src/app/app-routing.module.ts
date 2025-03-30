@@ -4,13 +4,31 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'authentication',
+    redirectTo: 'authentication/login', // Redirige a login por defecto
     pathMatch: 'full'
   },
   {
     path: 'authentication',
-    loadChildren: () => import('./authentication/authentication.module').then( m => m.AuthenticationPageModule)
+    children: [
+      {
+        path: 'login',
+        loadComponent: () => import('./authentication/authentication.page').then(m => m.AuthenticationPage)
+      },
+      {
+        path: 'signup',
+        loadComponent: () => import('./authentication/authentication.page').then(m => m.AuthenticationPage)
+      },
+      {
+        path: 'reset',
+        loadComponent: () => import('./authentication/authentication.page').then(m => m.AuthenticationPage)
+      }
+    ]
   },
+  // Ruta comodín para manejar errores 404
+  {
+    path: '**',
+    redirectTo: 'authentication/login'
+  }
 ];
 
 @NgModule({
