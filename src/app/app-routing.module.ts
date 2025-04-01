@@ -4,7 +4,7 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'authentication/login', // Redirige a login por defecto
+    redirectTo: 'authentication/login',
     pathMatch: 'full'
   },
   {
@@ -21,10 +21,16 @@ const routes: Routes = [
       {
         path: 'reset',
         loadComponent: () => import('./authentication/authentication.page').then(m => m.AuthenticationPage)
+      },
+      {
+        path: 'admin',
+        loadComponent: () => import('./authentication/admin/admin.page').then(m => m.AdminPage)
+      },{
+        path: 'user',
+        loadComponent: () => import('./authentication/user/user.page').then(m => m.UserPage)
       }
     ]
   },
-  // Ruta comodín para manejar errores 404
   {
     path: '**',
     redirectTo: 'authentication/login'

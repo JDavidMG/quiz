@@ -85,17 +85,18 @@ export class AuthenticationPage {
   }
 
   login({ email, password }: UserCredentials) {
-    this.authService
-      .login(email, password!)
+    this.authService.login(email, password!)
       .pipe(
         tap((userCredential) => {
-          console.log('Correcto: Inicio de sesión exitoso', userCredential.user);
+          const isAdmin = userCredential.user?.email === 'admin@gmail.com';
+          this.router.navigateByUrl(
+            isAdmin ? '/authentication/admin' : '/authentication/user'
+          );
         }),
-        tap(() => this.router.navigateByUrl(''))
+
       )
       .subscribe();
   }
-
   signup({ email, password }: UserCredentials) {
     this.authService
       .signup(email, password!)
