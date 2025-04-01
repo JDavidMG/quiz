@@ -11,6 +11,8 @@ import {
   IonToolbar,
 } from '@ionic/angular/standalone';
 import { AuthFormComponent } from './auth-form/auth-form.component';
+import { AuthService } from './authentication.service'; // Ajuste de la importación
+import { tap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-authentication',
@@ -32,7 +34,8 @@ import { AuthFormComponent } from './auth-form/auth-form.component';
 })
 export class AuthenticationPage {
   private readonly router = inject(Router);
-
+  private readonly authService = inject(AuthService); // Ajuste de la inyección
+  
   // Configuración de la página
   private readonly AUTH_PAGE_CONFIG = {
     login: {
@@ -82,18 +85,29 @@ export class AuthenticationPage {
   }
 
   login({ email, password }: UserCredentials) {
-    console.log('Login attempt with:', email, password);
-    // Implementar lógica de autenticación aquí
+    this.authService
+      .login(email, password!)
+      .pipe(
+        tap((userCredential) => {
+          console.log('Correcto: Inicio de sesión exitoso', userCredential.user);
+        }),
+        tap(() => this.router.navigateByUrl(''))
+      )
+      .subscribe();
   }
 
   signup({ email, password }: UserCredentials) {
-    console.log('Signup attempt with:', email, password);
-    // Implementar lógica de registro aquí
+    this.authService
+      .signup(email, password!)
+      .pipe(tap(() => this.router.navigateByUrl('')))
+      .subscribe();
   }
 
   resetPassword({ email }: UserCredentials) {
-    console.log('Password reset for:', email);
-    // Implementar lógica de reseteo aquí
+    this.authService
+      .resetPassword(email)
+      .pipe(tap(() => this.router.navigateByUrl('auth/login')))
+      .subscribe();
   }
 }
 
