@@ -4,7 +4,7 @@ import { IonicModule } from '@ionic/angular';
 
 @Component({
   selector: 'app-user',
-  templateUrl: './user.html',
+  templateUrl: 'user.page.html',
   standalone: true,
   imports: [IonicModule]
 })

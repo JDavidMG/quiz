@@ -25,7 +25,8 @@ const routes: Routes = [
       {
         path: 'admin',
         loadComponent: () => import('./authentication/admin/admin.page').then(m => m.AdminPage)
-      },{
+      },
+      {
         path: 'user',
         loadComponent: () => import('./authentication/user/user.page').then(m => m.UserPage)
       }

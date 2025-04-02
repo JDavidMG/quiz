@@ -1,0 +1,80 @@
+<ion-header>
+  <ion-toolbar color="primary">
+    <ion-title>Administrador de Quizzes</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="ion-padding">
+  <!-- Carga de archivo -->
+  <div class="file-upload-container">
+    <ion-label class="file-label">Selecciona tu archivo Excel:</ion-label>
+    <input 
+      type="file" 
+      (change)="onFileChange($event)" 
+      accept=".xlsx, .xls" 
+      class="file-input"
+      id="excelUpload"
+    />
+    <label for="excelUpload" class="file-button">
+      <ion-icon name="document-attach"></ion-icon>
+      Seleccionar archivo
+    </label>
+  </div>
+
+  <!-- Tarjeta del tema -->
+  <ion-card *ngIf="quizData" class="theme-card">
+    <ion-card-header>
+      <ion-card-title>{{ quizData.tema }}</ion-card-title>
+    </ion-card-header>
+    
+    <ion-card-content>
+      <ion-button expand="block" (click)="showQuestions = !showQuestions">
+        {{ showQuestions ? 'Ocultar preguntas' : 'Mostrar preguntas' }}
+      </ion-button>
+      
+      <ion-text color="medium">
+        <p class="total-questions">Total preguntas: {{ quizData.preguntas.length }}</p>
+      </ion-text>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Lista de preguntas -->
+  <div *ngIf="showQuestions && quizData">
+    <ion-list lines="full">
+      <ion-item 
+        *ngFor="let pregunta of quizData.preguntas; let i = index"
+        (click)="toggleQuestion(i)"
+        detail
+      >
+        <ion-label>
+          <h2><strong>{{ i + 1 }}.</strong> {{ pregunta.pregunta }}</h2>
+          
+          <div *ngIf="expandedQuestions[i]" class="answers-container">
+            <ion-chip color="success">
+              <ion-label>Correcta: {{ pregunta.respuestaCorrecta }}</ion-label>
+            </ion-chip>
+            
+            <ion-list-header>Incorrectas:</ion-list-header>
+            <ion-chip 
+              *ngFor="let incorrecta of pregunta.respuestasIncorrectas" 
+              color="danger"
+            >
+              <ion-label>{{ incorrecta }}</ion-label>
+            </ion-chip>
+          </div>
+        </ion-label>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <!-- Botón de subida -->
+  <ion-button 
+    *ngIf="quizData"
+    expand="block" 
+    (click)="uploadToFirestore()" 
+    class="upload-button"
+  >
+    <ion-icon slot="start" name="cloud-upload"></ion-icon>
+    Subir Quiz a Firestore
+  </ion-button>
+</ion-content>
