@@ -8,7 +8,7 @@ import {
   IonItem, IonLabel, IonList, IonButton,
   IonIcon, IonChip, IonListHeader,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonText
+  IonText,IonButtons 
 } from '@ionic/angular/standalone';
 
 interface QuizData {
@@ -33,7 +33,7 @@ interface QuizQuestion {
     IonItem, IonLabel, IonList, IonButton,
     IonIcon, IonChip, IonListHeader,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonText
+    IonText,IonButtons 
   ]
 })
 export class AdminPage {
@@ -129,5 +129,17 @@ export class AdminPage {
       buttons: ['OK']
     });
     await alert.present();
+  }
+  downloadTemplate() {
+    // Ruta al archivo en la carpeta assets (asumiendo que lo tienes ahí)
+    const filePath = 'assets/Formato.xlsx';
+    
+    // Crear un enlace temporal para la descarga
+    const link = document.createElement('a');
+    link.href = filePath;
+    link.download = 'Formato.xlsx'; // Nombre del archivo al descargar
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 }
