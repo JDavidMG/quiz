@@ -1,0 +1,70 @@
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50vh;
+  }
+  
+  ion-item-sliding {
+    margin-bottom: 8px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  ion-item {
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --inner-padding-end: 0;
+    --background: var(--ion-color-light);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    
+    &[button] {
+      --background-hover: var(--ion-color-light-shade);
+    }
+  }
+  
+  ion-label h2 {
+    font-weight: 600;
+    color: var(--ion-color-dark);
+  }
+  
+  ion-label p {
+    color: var(--ion-color-medium);
+    font-size: 0.9em;
+  }
+  
+  ion-item-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  ion-icon {
+    font-size: 1.5em;
+  }
+  
+  /* Estilos para la vista de detalle */
+  ion-card-header {
+    background: var(--ion-color-primary);
+    color: white;
+  }
+  
+  ion-chip {
+    margin: 2px;
+  }
+  /* Añade esto a tu CSS */
+.nav-button-alt {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+  }
+  
+  .flipped-icon {
+    transform: rotate(180deg); /* Rota el ícono 180 grados */
+    margin-right: 4px; /* Espacio entre ícono y texto */
+  }

@@ -89,3 +89,19 @@
   .upload-button {
     margin-top: 20px;
   }
+  .nav-button-alt {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    
+    ion-icon {
+      margin-left: 4px;
+      font-size: 1.4em;
+      color: var(--ion-color-primary);
+    }
+    
+    span {
+      margin-right: 4px;
+    }
+  }

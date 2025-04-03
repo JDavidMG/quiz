@@ -29,7 +29,11 @@ const routes: Routes = [
       {
         path: 'user',
         loadComponent: () => import('./user/user.page').then(m => m.UserPage)
-      }
+      },
+      {
+        path: 'viedel',
+        loadComponent: () => import('./viedel/viedel.page').then(m => m.ViedelPage)
+      },
     ]
   },
   {

@@ -3,12 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Firestore, collection, doc, writeBatch } from '@angular/fire/firestore';
 import * as XLSX from 'xlsx';
 import { AlertController } from '@ionic/angular';
+import { Router } from '@angular/router';
 import { 
   IonHeader, IonToolbar, IonTitle, IonContent, 
   IonItem, IonLabel, IonList, IonButton,
   IonIcon, IonChip, IonListHeader,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonText,IonButtons 
+  IonText,IonButtons ,  IonFab, IonFabButton // Añadidos estos imports
+
 } from '@ionic/angular/standalone';
 
 interface QuizData {
@@ -33,7 +35,8 @@ interface QuizQuestion {
     IonItem, IonLabel, IonList, IonButton,
     IonIcon, IonChip, IonListHeader,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonText,IonButtons 
+    IonText,IonButtons,  IonFab, IonFabButton // Añadidos estos imports
+
   ]
 })
 export class AdminPage {
@@ -43,9 +46,14 @@ export class AdminPage {
 
   constructor(
     private firestore: Firestore,
-    private alertController: AlertController
-  ) {}
+    private alertController: AlertController,
+    private router: Router
 
+  ) {}
+  navigateToOtherPage() {
+    this.router.navigate(['/authentication/viedel']); // Ruta completa con /authentication/
+  }
+  
   async onFileChange(event: any) {
     const file = event.target.files[0];
     if (!file) return;
