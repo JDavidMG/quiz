@@ -26,10 +26,7 @@ const routes: Routes = [
         path: 'admin',
         loadComponent: () => import('./admin/admin.page').then(m => m.AdminPage)
       },
-      {
-        path: 'user',
-        loadComponent: () => import('./user/user.page').then(m => m.UserPage)
-      }
+      
     ]
   },
   // Añade esta nueva sección para las tabs
