@@ -29,11 +29,31 @@ const routes: Routes = [
       {
         path: 'user',
         loadComponent: () => import('./user/user.page').then(m => m.UserPage)
+      }
+    ]
+  },
+  // Añade esta nueva sección para las tabs
+  {
+    path: 'tabs',
+    loadComponent: () => import('./tabs/tabs.component').then(m => m.TabsComponent),
+    children: [
+      {
+        path: 'tab1',
+        loadComponent: () => import('./tab1/tab1.page').then(m => m.Tab1Page)
       },
       {
-        path: 'viedel',
-        loadComponent: () => import('./viedel/viedel.page').then(m => m.ViedelPage)
+        path: 'tab2',
+        loadComponent: () => import('./tab2/tab2.page').then(m => m.Tab2Page)
       },
+      {
+        path: 'tab3',
+        loadComponent: () => import('./tab3/tab3.page').then(m => m.Tab3Page)
+      },
+      {
+        path: '',
+        redirectTo: '/tabs/tab1',
+        pathMatch: 'full'
+      }
     ]
   },
   {

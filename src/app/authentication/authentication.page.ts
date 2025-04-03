@@ -90,7 +90,7 @@ export class AuthenticationPage {
         tap((userCredential) => {
           const isAdmin = userCredential.user?.email === 'admin@gmail.com';
           this.router.navigateByUrl(
-            isAdmin ? '/authentication/admin' : '/authentication/user'
+            isAdmin ? '/authentication/admin' : '/tabs/tab1'
           );
         }),
 
