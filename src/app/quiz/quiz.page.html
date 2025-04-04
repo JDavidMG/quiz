@@ -72,7 +72,27 @@
             </ion-label>
           </ion-item>
         </ion-list>
-
+        <!-- Dentro de tu results-container -->
+        <div *ngIf="quizFinished" class="ranking-section">
+          <h2>🏆 Ranking Global</h2>
+          
+          <div *ngIf="topPlayers.length > 0">
+            <ion-list>
+              <ion-item *ngFor="let player of topPlayers; let i = index" 
+                      [class.highlight]="player.userId === currentUser?.uid">
+                <ion-label>
+                  <h2>#{{i+1}} {{player.userName}}</h2>
+                  <p>{{player.score}} puntos</p>
+                  <p>{{player.lastUpdated | date:'mediumDate'}}</p>
+                </ion-label>
+              </ion-item>
+            </ion-list>
+          </div>
+          
+          <div *ngIf="topPlayers.length === 0">
+            <p>No hay registros en el ranking aún</p>
+          </div>
+        </div>
         <ion-button expand="block" (click)="restartQuiz()">
           Intentar nuevamente
         </ion-button>

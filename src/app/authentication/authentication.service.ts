@@ -17,7 +17,7 @@ import { tap } from 'rxjs/operators';
 })
 export class AuthService {
   private readonly auth = inject(Auth);
-
+  
   getUser(): Observable<User | null> {
     return user(this.auth);
   }
@@ -39,7 +39,7 @@ export class AuthService {
   resetPassword(email: string): Observable<void> {
     return from(sendPasswordResetEmail(this.auth, email));
   }
-
+  
   logout(): Observable<void> {
     return from(signOut(this.auth));
   }

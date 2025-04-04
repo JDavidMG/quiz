@@ -1,0 +1,17 @@
+.ranking-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(var(--ion-color-light-rgb), 0.3);
+    border-radius: 10px;
+  
+    h2 {
+      text-align: center;
+      color: var(--ion-color-primary);
+    }
+  }
+  
+  .highlight {
+    --background: rgba(var(--ion-color-primary-rgb), 0.1);
+    border-left: 3px solid var(--ion-color-primary);
+  }
+  

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
-import { Firestore, doc,collection, getDoc, setDoc } from '@angular/fire/firestore'; // Añadido setDoc aquí
+import { Firestore, collection, doc, getDoc, setDoc, updateDoc, query, where, orderBy, limit, getDocs } from '@angular/fire/firestore';
 import { AuthService } from '../authentication/authentication.service';
 
 interface Question {
@@ -16,6 +16,15 @@ interface QuizResult {
   isCorrect: boolean;
   timeLeft: number;
   score: number;
+}
+
+interface GlobalRanking {
+  userId: string;
+  userName: string;
+  score: number;
+  quizId: string;
+  quizName: string;
+  lastUpdated: Date;
 }
 
 @Component({
@@ -42,6 +51,7 @@ export class QuizPage {
   totalScore = 0;
   correctAnswers = 0;
   results: QuizResult[] = [];
+  topPlayers: GlobalRanking[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -52,6 +62,10 @@ export class QuizPage {
     this.loadQuizData();
     this.authService.getUser().subscribe(user => {
       this.currentUser = user;
+      // Cargar el ranking cuando tengamos el usuario
+      if (this.quizId) {
+        this.loadTopPlayers();
+      }
     });
   }
 
@@ -164,9 +178,14 @@ export class QuizPage {
   async saveResults() {
     if (!this.currentUser) return;
     
-    // Crear una nueva referencia con ID automático
+    // Asegurarnos de tener los datos actualizados del usuario
+    const userDoc = await getDoc(doc(this.firestore, `users/${this.currentUser.uid}`));
+    const userName = userDoc.exists() ? 
+                    (userDoc.data()['displayName'] || this.currentUser.displayName || 'Anónimo') : 
+                    (this.currentUser.displayName || 'Anónimo');
+  
+    // Guardar resultado individual
     const userResultsRef = doc(collection(this.firestore, `users/${this.currentUser.uid}/quizResults`));
-    
     await setDoc(userResultsRef, {
       quizId: this.quizId,
       quizName: this.quizData?.tema || 'Sin nombre',
@@ -174,7 +193,74 @@ export class QuizPage {
       correctAnswers: this.correctAnswers,
       totalQuestions: 10,
       date: new Date(),
-      details: this.results
+      details: this.results,
+      userName: userName // Usamos el nombre obtenido
     });
+  
+    // Actualizar ranking global
+    await this.updateGlobalRanking(userName); // Pasamos el nombre como parámetro
+  }
+
+  async updateGlobalRanking(userName: string) {
+    if (!this.currentUser) return;
+    
+    const globalRankingRef = doc(this.firestore, `globalRankings/${this.quizId}_${this.currentUser.uid}`);
+    
+    try {
+      const existingRanking = await getDoc(globalRankingRef);
+      
+      if (existingRanking.exists()) {
+        const currentScore = existingRanking.data()['score'];
+        if (this.totalScore > currentScore) {
+          await updateDoc(globalRankingRef, {
+            score: this.totalScore,
+            lastUpdated: new Date(),
+            userName: userName // Actualizamos siempre el nombre por si cambió
+          });
+        }
+      } else {
+        await setDoc(globalRankingRef, {
+          userId: this.currentUser.uid,
+          userName: userName, // Usamos el nombre obtenido
+          score: this.totalScore,
+          quizId: this.quizId,
+          quizName: this.quizData?.tema || 'Sin nombre',
+          lastUpdated: new Date()
+        });
+      }
+      
+      await this.loadTopPlayers();
+    } catch (error) {
+      console.error('Error actualizando ranking global:', error);
+    }
+  }
+
+  async loadTopPlayers() {
+    try {
+      // Solución temporal - no recomendada para producción con muchos documentos
+      const q = query(
+        collection(this.firestore, 'globalRankings'),
+        orderBy("score", "desc")
+      );
+      
+      const querySnapshot = await getDocs(q);
+      this.topPlayers = querySnapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            userId: data['userId'],
+            userName: data['userName'],
+            score: data['score'],
+            quizId: data['quizId'],
+            quizName: data['quizName'],
+            lastUpdated: data['lastUpdated']?.toDate?.() || new Date()
+          };
+        })
+        .filter(player => player.quizId === this.quizId)
+        .slice(0, 10); // Tomar solo los top 10
+      
+    } catch (error) {
+      console.error('Error cargando top players:', error);
+    }
   }
 }
