@@ -25,8 +25,8 @@ export class Tab2Page {
     const quizzesCollection = collection(this.firestore, 'quizzes');
     this.quizzes$ = collectionData(quizzesCollection, { idField: 'id' });
   }
-  // Agrega este método
+
   enterQuiz(quizId: string) {
-    this.navCtrl.navigateForward(['/quiz', quizId]);
+    this.navCtrl.navigateForward(['/quiz', quizId]); // Navegación con parámetro
   }
 }

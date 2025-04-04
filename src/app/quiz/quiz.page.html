@@ -1,0 +1,16 @@
+<ion-header [translucent]="true">
+    <ion-toolbar>
+      <ion-title>Quiz</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  
+  <ion-content [fullscreen]="true">
+    <div class="ion-padding">
+      <h1>Detalles del Quiz</h1>
+      <p>ID del Quiz: {{ quizId }}</p>
+      
+      <div *ngIf="currentUser">
+        <p>Usuario actual: {{ currentUser.email }}</p>
+      </div>
+    </div>
+  </ion-content>

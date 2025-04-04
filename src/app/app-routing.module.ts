@@ -25,11 +25,12 @@ const routes: Routes = [
       {
         path: 'admin',
         loadComponent: () => import('./admin/admin.page').then(m => m.AdminPage)
+      },{
+        path: 'viedel', // ← Nueva ruta para la página de ver/eliminar
+        loadComponent: () => import('./viedel/viedel.page').then(m => m.ViedelPage)
       },
-      
     ]
   },
-  // Añade esta nueva sección para las tabs
   {
     path: 'tabs',
     loadComponent: () => import('./tabs/tabs.component').then(m => m.TabsComponent),
@@ -52,6 +53,11 @@ const routes: Routes = [
         pathMatch: 'full'
       }
     ]
+  },
+  // Añade esta nueva ruta para el Quiz (fuera del árbol de tabs)
+  {
+    path: 'quiz/:id',
+    loadComponent: () => import('./quiz/quiz.page').then(m => m.QuizPage)
   },
   {
     path: '**',

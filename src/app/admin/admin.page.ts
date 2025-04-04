@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Firestore, collection, doc, writeBatch } from '@angular/fire/firestore';
+import { Firestore, collection, doc, setDoc } from '@angular/fire/firestore';
 import * as XLSX from 'xlsx';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
@@ -9,19 +9,21 @@ import {
   IonItem, IonLabel, IonList, IonButton,
   IonIcon, IonChip, IonListHeader,
   IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-  IonText,IonButtons ,  IonFab, IonFabButton // Añadidos estos imports
-
+  IonText, IonButtons, IonFab, IonFabButton
 } from '@ionic/angular/standalone';
 
 interface QuizData {
   tema: string;
   preguntas: QuizQuestion[];
+  createdAt?: Date;
+  totalPreguntas?: number;
+  accessedBy?: any[]; // Nuevo campo para el historial
 }
 
 interface QuizQuestion {
   pregunta: string;
-  respuestaCorrecta: string;
-  respuestasIncorrectas: string[];
+  respuestaCorrecta: string | number;
+  respuestasIncorrectas: (string | number)[];
 }
 
 @Component({
@@ -35,8 +37,7 @@ interface QuizQuestion {
     IonItem, IonLabel, IonList, IonButton,
     IonIcon, IonChip, IonListHeader,
     IonCard, IonCardHeader, IonCardTitle, IonCardContent,
-    IonText,IonButtons,  IonFab, IonFabButton // Añadidos estos imports
-
+    IonText, IonButtons, IonFab, IonFabButton
   ]
 })
 export class AdminPage {
@@ -48,16 +49,16 @@ export class AdminPage {
     private firestore: Firestore,
     private alertController: AlertController,
     private router: Router
-
   ) {}
+
   navigateToOtherPage() {
-    this.router.navigate(['/authentication/viedel']); // Ruta completa con /authentication/
+    this.router.navigate(['/authentication/viedel']);
   }
-  
+
   async onFileChange(event: any) {
     const file = event.target.files[0];
     if (!file) return;
-  
+
     const reader = new FileReader();
     reader.onload = (e: any) => {
       try {
@@ -65,41 +66,34 @@ export class AdminPage {
         const workbook = XLSX.read(data, { type: 'array' });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         
-        // Cambio importante: leer datos con header: 1 para ignorar la fila de encabezados
         const jsonData: any[] = XLSX.utils.sheet_to_json(firstSheet, { header: 1 });
-  
-        console.log('Datos crudos:', jsonData); // Para depuración
-  
+
         if (jsonData.length < 2) {
           throw new Error('El archivo debe contener al menos un tema y una pregunta');
         }
-  
-        // Extraer tema (primera fila, primera columna)
+
         const tema = jsonData[0][0] || 'Sin tema especificado';
         
-        // Procesar preguntas (filas desde la 2 en adelante)
         this.quizData = {
           tema: tema,
-          preguntas: jsonData.slice(2) // Saltar fila de tema y encabezados
-            .filter(row => row && row[0]) // Filtrar filas vacías
+          preguntas: jsonData.slice(2)
+            .filter(row => row && row[0])
             .map(row => ({
               pregunta: row[0] || 'Sin pregunta',
-              respuestaCorrecta: row[1] || 'Sin respuesta correcta',
+              respuestaCorrecta: row[1] ?? 'Sin respuesta correcta',
               respuestasIncorrectas: [
                 row[2],
                 row[3],
                 row[4]
-              ].filter(Boolean) // Eliminar respuestas vacías
+              ].filter(Boolean)
             }))
         };
-  
+
         this.expandedQuestions = new Array(this.quizData.preguntas.length).fill(false);
-        console.log('Datos procesados:', this.quizData); // Para depuración
         this.presentAlert('Éxito', `Tema: ${this.quizData.tema}\nPreguntas cargadas: ${this.quizData.preguntas.length}`);
       } catch (error) {
         console.error('Error:', error);
-        const errorMessage = error instanceof Error ? error.message : 'Error al procesar el archivo';
-        this.presentAlert('Error', errorMessage);
+        this.presentAlert('Error', error instanceof Error ? error.message : 'Error al procesar el archivo');
       }
     };
     reader.readAsArrayBuffer(file);
@@ -117,16 +111,17 @@ export class AdminPage {
   
     try {
       const quizRef = doc(collection(this.firestore, 'quizzes'));
-      await writeBatch(this.firestore).set(quizRef, {
+      await setDoc(quizRef, {
         ...this.quizData,
         createdAt: new Date(),
-        totalPreguntas: this.quizData.preguntas.length
-      }).commit();
-  
+        totalPreguntas: this.quizData.preguntas.length,
+        accessedBy: [] // Inicializamos el array vacío
+      });
+
       this.presentAlert('Éxito', `Quiz "${this.quizData.tema}" subido correctamente`);
+      this.quizData = null; // Limpiar después de subir
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Error al subir a Firestore';
-      this.presentAlert('Error', errorMessage);
+      this.presentAlert('Error', error instanceof Error ? error.message : 'Error al subir a Firestore');
     }
   }
 
@@ -138,14 +133,12 @@ export class AdminPage {
     });
     await alert.present();
   }
+
   downloadTemplate() {
-    // Ruta al archivo en la carpeta assets (asumiendo que lo tienes ahí)
     const filePath = 'assets/Formato.xlsx';
-    
-    // Crear un enlace temporal para la descarga
     const link = document.createElement('a');
     link.href = filePath;
-    link.download = 'Formato.xlsx'; // Nombre del archivo al descargar
+    link.download = 'Formato.xlsx';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

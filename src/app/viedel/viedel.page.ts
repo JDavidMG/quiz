@@ -13,6 +13,7 @@ import { Firestore, collection, doc, deleteDoc, collectionData } from '@angular/
 import { Observable, of } from 'rxjs';
 import { AlertController, ToastController } from '@ionic/angular/standalone';
 import { DatePipe } from '@angular/common';
+import { Auth } from '@angular/fire/auth';
 
 interface QuizData {
   id: string;
@@ -49,8 +50,8 @@ export class ViedelPage {
     private firestore: Firestore,
     private alertController: AlertController,
     private toastController: ToastController,
-    private router: Router
-
+    private router: Router,
+    private auth: Auth,
   ) {
     this.loadQuizzes();
   }
@@ -92,12 +93,18 @@ export class ViedelPage {
 
   async deleteQuiz(quizId: string) {
     try {
+      const user = await this.auth.currentUser;
+      console.log('Usuario actual:', user?.email);
+      
       const quizDoc = doc(this.firestore, `quizzes/${quizId}`);
+      console.log('Intentando eliminar:', quizId);
+      
       await deleteDoc(quizDoc);
+      console.log('Eliminación exitosa');
       this.showToast('Quiz eliminado correctamente');
     } catch (error) {
-      console.error('Error al eliminar:', error);
-      this.showToast('Error al eliminar el quiz', 'danger');
+      console.error('Error completo:', error);
+      this.showToast(`Error: ${error instanceof Error ? error.message : 'Desconocido'}`, 'danger');
     }
   }
 

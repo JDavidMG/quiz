@@ -12,13 +12,13 @@
         <p>{{ quiz.preguntas?.length || 0 }} preguntas</p>
       </ion-label>
       <ion-button 
-      slot="end" 
-      fill="solid" 
-      color="primary"
-      (click)="enterQuiz(quiz.id)"
-    >
-      Entrar
-    </ion-button>
+        slot="end" 
+        fill="solid" 
+        color="primary"
+        (click)="enterQuiz(quiz.id)"
+      >
+        Entrar
+      </ion-button>
     </ion-item>
 
     <ion-item *ngIf="(quizzes$ | async)?.length === 0">
