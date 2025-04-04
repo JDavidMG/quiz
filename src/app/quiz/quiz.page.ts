@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
-import { Firestore, doc, getDoc, setDoc } from '@angular/fire/firestore'; // Añadido setDoc aquí
+import { Firestore, doc,collection, getDoc, setDoc } from '@angular/fire/firestore'; // Añadido setDoc aquí
 import { AuthService } from '../authentication/authentication.service';
 
 interface Question {
@@ -164,22 +164,17 @@ export class QuizPage {
   async saveResults() {
     if (!this.currentUser) return;
     
-    const userResultsRef = doc(
-      this.firestore, 
-      'users', 
-      this.currentUser.uid, 
-      'quizResults', 
-      this.quizId
-    );
+    // Crear una nueva referencia con ID automático
+    const userResultsRef = doc(collection(this.firestore, `users/${this.currentUser.uid}/quizResults`));
     
-    await setDoc(userResultsRef, { // Ahora setDoc está correctamente importado
+    await setDoc(userResultsRef, {
       quizId: this.quizId,
       quizName: this.quizData?.tema || 'Sin nombre',
       score: this.totalScore,
       correctAnswers: this.correctAnswers,
       totalQuestions: 10,
-      date: new Date().toISOString(),
+      date: new Date(),
       details: this.results
-    }, { merge: true });
+    });
   }
 }
