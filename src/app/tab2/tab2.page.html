@@ -1,17 +1,30 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Tab 2
-    </ion-title>
+    <ion-title>Quizzes Disponibles</ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 2</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-list>
+    <ion-item *ngFor="let quiz of quizzes$ | async">
+      <ion-label>
+        <h2>{{ quiz.tema || 'Quiz sin título' }}</h2>
+        <p>{{ quiz.preguntas?.length || 0 }} preguntas</p>
+      </ion-label>
+      <ion-button 
+      slot="end" 
+      fill="solid" 
+      color="primary"
+      (click)="enterQuiz(quiz.id)"
+    >
+      Entrar
+    </ion-button>
+    </ion-item>
 
-  <app-explore-container name="Tab 2 page"></app-explore-container>
+    <ion-item *ngIf="(quizzes$ | async)?.length === 0">
+      <ion-label class="ion-text-center">
+        No hay quizzes disponibles
+      </ion-label>
+    </ion-item>
+  </ion-list>
 </ion-content>

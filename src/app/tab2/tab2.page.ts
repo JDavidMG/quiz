@@ -1,16 +1,32 @@
-import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
-import { ExploreContainerComponent } from '../explore-container/explore-container.component';
+import { Firestore, collection, collectionData } from '@angular/fire/firestore';
+import { Observable } from 'rxjs';
+import { NavController } from '@ionic/angular';
+
 @Component({
   selector: 'app-tab2',
   templateUrl: 'tab2.page.html',
   styleUrls: ['tab2.page.scss'],
   imports: [
     IonicModule,
-    CommonModule,
-    ExploreContainerComponent,
+    CommonModule
   ],
   standalone: true
 })
-export class Tab2Page { }
+export class Tab2Page {
+  quizzes$: Observable<any[]>;
+
+  constructor(
+    private firestore: Firestore,
+    private navCtrl: NavController
+  ) {
+    const quizzesCollection = collection(this.firestore, 'quizzes');
+    this.quizzes$ = collectionData(quizzesCollection, { idField: 'id' });
+  }
+  // Agrega este método
+  enterQuiz(quizId: string) {
+    this.navCtrl.navigateForward(['/quiz', quizId]);
+  }
+}
