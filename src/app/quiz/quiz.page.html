@@ -1,16 +1,82 @@
 <ion-header [translucent]="true">
-    <ion-toolbar>
-      <ion-title>Quiz</ion-title>
-    </ion-toolbar>
-  </ion-header>
-  
-  <ion-content [fullscreen]="true">
-    <div class="ion-padding">
-      <h1>Detalles del Quiz</h1>
-      <p>ID del Quiz: {{ quizId }}</p>
+  <ion-toolbar>
+    <ion-title>Quiz Challenge</ion-title>
+    <ion-buttons slot="end">
+      <ion-badge color="danger" *ngIf="timeLeft > 0">
+        {{ timeLeft }}s
+      </ion-badge>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="ion-padding">
+  <!-- Pantalla de inicio -->
+  <div *ngIf="!quizStarted" class="start-screen">
+    <h1>¡Bienvenido al Quiz!</h1>
+    <p>Seleccionaremos 10 preguntas al azar</p>
+    <p>Tienes 30 segundos por pregunta</p>
+    <p>Puntuación basada en tu rapidez</p>
+    <ion-button expand="block" (click)="startQuiz()">
+      Comenzar
+    </ion-button>
+  </div>
+
+  <!-- Pregunta actual -->
+  <div *ngIf="quizStarted && currentQuestion" class="question-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>Pregunta {{ currentQuestionIndex + 1 }}/10</ion-card-title>
+      </ion-card-header>
       
-      <div *ngIf="currentUser">
-        <p>Usuario actual: {{ currentUser.email }}</p>
-      </div>
-    </div>
-  </ion-content>
+      <ion-card-content>
+        <h2>{{ currentQuestion.pregunta }}</h2>
+        
+        <ion-list>
+          <ion-item 
+            *ngFor="let option of shuffledOptions" 
+            button 
+            (click)="checkAnswer(option)"
+            [disabled]="answered"
+          >
+            <ion-label>{{ option }}</ion-label>
+            <ion-icon 
+              slot="end" 
+              [name]="getAnswerIcon(option)" 
+              [color]="getAnswerColor(option)">
+            </ion-icon>
+          </ion-item>
+        </ion-list>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Resultados finales -->
+  <div *ngIf="quizFinished" class="results-container">
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>¡Quiz Completado!</ion-card-title>
+      </ion-card-header>
+      
+      <ion-card-content>
+        <h2>Puntuación Final: {{ totalScore }}</h2>
+        <p>Respuestas correctas: {{ correctAnswers }}/10</p>
+        
+        <ion-list>
+          <ion-item *ngFor="let result of results; let i = index">
+            <ion-label>
+              <h3>Pregunta {{ i + 1 }}</h3>
+              <p>
+                Puntos: {{ result.score }} | 
+                Tiempo: {{ 30 - result.timeLeft }}s
+              </p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+
+        <ion-button expand="block" (click)="restartQuiz()">
+          Intentar nuevamente
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
