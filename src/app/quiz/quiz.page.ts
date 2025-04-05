@@ -219,47 +219,47 @@ export class QuizPage {
   }
 
   async updateGlobalRanking(userName: string) {
-  if (!this.currentUser) return;
-  
-  const globalRankingRef = doc(this.firestore, `globalRankings/${this.quizId}_${this.currentUser.uid}`);
-  
-  try {
-    const existingRanking = await getDoc(globalRankingRef);
+    if (!this.currentUser) return;
     
-    if (existingRanking.exists()) {
-      const currentScore = existingRanking.data()['score'] || 0;
+    const globalRankingRef = doc(this.firestore, `globalRankings/${this.quizId}_${this.currentUser.uid}`);
+    
+    try {
+      const existingRanking = await getDoc(globalRankingRef);
       
-      // Solo actualizar si el nuevo score es mayor que el existente
-      if (this.totalScore > currentScore) {
-        await updateDoc(globalRankingRef, {
-          score: this.totalScore,
-          lastUpdated: new Date(),
-          userName: userName,
-          quizName: this.quizData?.tema || 'Sin nombre'
-        });
-        console.log('Ranking actualizado con nuevo récord');
+      if (existingRanking.exists()) {
+        const currentScore = existingRanking.data()['score'] || 0;
+        
+        // Solo actualizar si el nuevo score es mayor que el existente
+        if (this.totalScore > currentScore) {
+          await updateDoc(globalRankingRef, {
+            score: this.totalScore,
+            lastUpdated: new Date(),
+            userName: userName,
+            quizName: this.quizData?.tema || 'Sin nombre'
+          });
+          console.log('Ranking actualizado con nuevo récord');
+        } else {
+          console.log('El puntaje no supera el récord existente, no se actualiza');
+        }
       } else {
-        console.log('El puntaje no supera el récord existente, no se actualiza');
+        // Crear nuevo registro si no existe
+        await setDoc(globalRankingRef, {
+          userId: this.currentUser.uid,
+          userName: userName,
+          score: this.totalScore,
+          quizId: this.quizId,
+          quizName: this.quizData?.tema || 'Sin nombre',
+          lastUpdated: new Date()
+        });
+        console.log('Nuevo registro creado en el ranking');
       }
-    } else {
-      // Crear nuevo registro si no existe
-      await setDoc(globalRankingRef, {
-        userId: this.currentUser.uid,
-        userName: userName,
-        score: this.totalScore,
-        quizId: this.quizId,
-        quizName: this.quizData?.tema || 'Sin nombre',
-        lastUpdated: new Date()
-      });
-      console.log('Nuevo registro creado en el ranking');
+      
+      // Recargar el ranking después de actualizar
+      await this.loadTopPlayers();
+    } catch (error) {
+      console.error('Error actualizando ranking global:', error);
     }
-    
-    // Recargar el ranking después de actualizar
-    await this.loadTopPlayers();
-  } catch (error) {
-    console.error('Error actualizando ranking global:', error);
   }
-}
 
   async loadTopPlayers() {
     try {
@@ -275,11 +275,11 @@ export class QuizPage {
         const data = doc.data();
         return {
           userId: data['userId'],
-          userName: data['userName'] || 'Anónimo', // Fallback por si acaso
+          userName: data['userName'] || 'Anónimo',
           score: data['score'],
           quizId: data['quizId'],
           quizName: data['quizName'],
-          lastUpdated: data['lastUpdated']?.toDate?.() || new Date()
+          lastUpdated: data['lastUpdated']?.toDate() || new Date()
         };
       });
       

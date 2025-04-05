@@ -2,7 +2,7 @@
   <ion-toolbar>
     <ion-title>Quiz Challenge</ion-title>
     <ion-buttons slot="end">
-      <ion-badge color="danger" *ngIf="timeLeft > 0">
+      <ion-badge color="danger" *ngIf="timeLeft > 0 && quizStarted && !quizFinished">
         {{ timeLeft }}s
       </ion-badge>
     </ion-buttons>
@@ -11,7 +11,7 @@
 
 <ion-content [fullscreen]="true" class="ion-padding">
   <!-- Pantalla de inicio -->
-  <div *ngIf="!quizStarted" class="start-screen">
+  <div *ngIf="!quizStarted && !quizFinished" class="start-screen">
     <h1>¡Bienvenido al Quiz!</h1>
     <p>Seleccionaremos 10 preguntas al azar</p>
     <p>Tienes 30 segundos por pregunta</p>
@@ -22,7 +22,7 @@
   </div>
 
   <!-- Pregunta actual -->
-  <div *ngIf="quizStarted && currentQuestion" class="question-container">
+  <div *ngIf="quizStarted && !quizFinished && currentQuestion" class="question-container">
     <ion-card>
       <ion-card-header>
         <ion-card-title>Pregunta {{ currentQuestionIndex + 1 }}/10</ion-card-title>
@@ -60,8 +60,8 @@
       <ion-card-content>
         <h2>Puntuación Final: {{ totalScore }}</h2>
         <p>Respuestas correctas: {{ correctAnswers }}/10</p>
-        <!-- Dentro de tu results-container -->
-        <div *ngIf="quizFinished" class="ranking-section">
+        
+        <div class="ranking-section">
           <h2>🏆 Ranking Global</h2>
           
           <div *ngIf="topPlayers.length > 0">
@@ -81,6 +81,7 @@
             <p>No hay registros en el ranking aún</p>
           </div>
         </div>
+        
         <ion-list>
           <ion-item *ngFor="let result of results; let i = index">
             <ion-label>
@@ -93,7 +94,9 @@
           </ion-item>
         </ion-list>
         
-        
+        <ion-button expand="block" (click)="restartQuiz()">
+          Intentar nuevamente
+        </ion-button>
       </ion-card-content>
     </ion-card>
   </div>
