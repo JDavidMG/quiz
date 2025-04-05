@@ -178,11 +178,28 @@ export class QuizPage {
   async saveResults() {
     if (!this.currentUser) return;
     
-    // Asegurarnos de tener los datos actualizados del usuario
-    const userDoc = await getDoc(doc(this.firestore, `users/${this.currentUser.uid}`));
-    const userName = userDoc.exists() ? 
-                    (userDoc.data()['displayName'] || this.currentUser.displayName || 'Anónimo') : 
-                    (this.currentUser.displayName || 'Anónimo');
+    // Obtener el nombre del usuario de manera más robusta
+    let userName = 'Anónimo';
+    
+    try {
+      // Primero intentar obtener el displayName del usuario autenticado
+      if (this.currentUser.displayName) {
+        userName = this.currentUser.displayName;
+      }
+      
+      // Luego intentar obtenerlo del documento del usuario en Firestore
+      const userDoc = await getDoc(doc(this.firestore, `users/${this.currentUser.uid}`));
+      if (userDoc.exists() && userDoc.data()['displayName']) {
+        userName = userDoc.data()['displayName'];
+      }
+      
+      // Si el usuario tiene email pero no nombre, usar la parte antes del @
+      if (userName === 'Anónimo' && this.currentUser.email) {
+        userName = this.currentUser.email.split('@')[0];
+      }
+    } catch (error) {
+      console.error('Error obteniendo nombre de usuario:', error);
+    }
   
     // Guardar resultado individual
     const userResultsRef = doc(collection(this.firestore, `users/${this.currentUser.uid}/quizResults`));
@@ -198,69 +215,77 @@ export class QuizPage {
     });
   
     // Actualizar ranking global
-    await this.updateGlobalRanking(userName); // Pasamos el nombre como parámetro
+    await this.updateGlobalRanking(userName);
   }
 
   async updateGlobalRanking(userName: string) {
-    if (!this.currentUser) return;
+  if (!this.currentUser) return;
+  
+  const globalRankingRef = doc(this.firestore, `globalRankings/${this.quizId}_${this.currentUser.uid}`);
+  
+  try {
+    const existingRanking = await getDoc(globalRankingRef);
     
-    const globalRankingRef = doc(this.firestore, `globalRankings/${this.quizId}_${this.currentUser.uid}`);
-    
-    try {
-      const existingRanking = await getDoc(globalRankingRef);
+    if (existingRanking.exists()) {
+      const currentScore = existingRanking.data()['score'] || 0;
       
-      if (existingRanking.exists()) {
-        const currentScore = existingRanking.data()['score'];
-        if (this.totalScore > currentScore) {
-          await updateDoc(globalRankingRef, {
-            score: this.totalScore,
-            lastUpdated: new Date(),
-            userName: userName // Actualizamos siempre el nombre por si cambió
-          });
-        }
-      } else {
-        await setDoc(globalRankingRef, {
-          userId: this.currentUser.uid,
-          userName: userName, // Usamos el nombre obtenido
+      // Solo actualizar si el nuevo score es mayor que el existente
+      if (this.totalScore > currentScore) {
+        await updateDoc(globalRankingRef, {
           score: this.totalScore,
-          quizId: this.quizId,
-          quizName: this.quizData?.tema || 'Sin nombre',
-          lastUpdated: new Date()
+          lastUpdated: new Date(),
+          userName: userName,
+          quizName: this.quizData?.tema || 'Sin nombre'
         });
+        console.log('Ranking actualizado con nuevo récord');
+      } else {
+        console.log('El puntaje no supera el récord existente, no se actualiza');
       }
-      
-      await this.loadTopPlayers();
-    } catch (error) {
-      console.error('Error actualizando ranking global:', error);
+    } else {
+      // Crear nuevo registro si no existe
+      await setDoc(globalRankingRef, {
+        userId: this.currentUser.uid,
+        userName: userName,
+        score: this.totalScore,
+        quizId: this.quizId,
+        quizName: this.quizData?.tema || 'Sin nombre',
+        lastUpdated: new Date()
+      });
+      console.log('Nuevo registro creado en el ranking');
     }
+    
+    // Recargar el ranking después de actualizar
+    await this.loadTopPlayers();
+  } catch (error) {
+    console.error('Error actualizando ranking global:', error);
   }
+}
 
   async loadTopPlayers() {
     try {
-      // Solución temporal - no recomendada para producción con muchos documentos
       const q = query(
         collection(this.firestore, 'globalRankings'),
-        orderBy("score", "desc")
+        where("quizId", "==", this.quizId), // Filtrar por el quiz actual
+        orderBy("score", "desc"),
+        limit(10) // Limitar a 10 resultados
       );
       
       const querySnapshot = await getDocs(q);
-      this.topPlayers = querySnapshot.docs
-        .map(doc => {
-          const data = doc.data();
-          return {
-            userId: data['userId'],
-            userName: data['userName'],
-            score: data['score'],
-            quizId: data['quizId'],
-            quizName: data['quizName'],
-            lastUpdated: data['lastUpdated']?.toDate?.() || new Date()
-          };
-        })
-        .filter(player => player.quizId === this.quizId)
-        .slice(0, 10); // Tomar solo los top 10
+      this.topPlayers = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          userId: data['userId'],
+          userName: data['userName'] || 'Anónimo', // Fallback por si acaso
+          score: data['score'],
+          quizId: data['quizId'],
+          quizName: data['quizName'],
+          lastUpdated: data['lastUpdated']?.toDate?.() || new Date()
+        };
+      });
       
     } catch (error) {
       console.error('Error cargando top players:', error);
+      this.topPlayers = [];
     }
   }
 }

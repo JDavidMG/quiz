@@ -60,18 +60,6 @@
       <ion-card-content>
         <h2>Puntuación Final: {{ totalScore }}</h2>
         <p>Respuestas correctas: {{ correctAnswers }}/10</p>
-        
-        <ion-list>
-          <ion-item *ngFor="let result of results; let i = index">
-            <ion-label>
-              <h3>Pregunta {{ i + 1 }}</h3>
-              <p>
-                Puntos: {{ result.score }} | 
-                Tiempo: {{ 30 - result.timeLeft }}s
-              </p>
-            </ion-label>
-          </ion-item>
-        </ion-list>
         <!-- Dentro de tu results-container -->
         <div *ngIf="quizFinished" class="ranking-section">
           <h2>🏆 Ranking Global</h2>
@@ -93,9 +81,19 @@
             <p>No hay registros en el ranking aún</p>
           </div>
         </div>
-        <ion-button expand="block" (click)="restartQuiz()">
-          Intentar nuevamente
-        </ion-button>
+        <ion-list>
+          <ion-item *ngFor="let result of results; let i = index">
+            <ion-label>
+              <h3>Pregunta {{ i + 1 }}</h3>
+              <p>
+                Puntos: {{ result.score }} | 
+                Tiempo: {{ 30 - result.timeLeft }}s
+              </p>
+            </ion-label>
+          </ion-item>
+        </ion-list>
+        
+        
       </ion-card-content>
     </ion-card>
   </div>
