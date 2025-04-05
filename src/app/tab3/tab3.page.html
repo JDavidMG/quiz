@@ -1,17 +1,93 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
+    <ion-title>Mi Historial</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="loadQuizHistory()" [disabled]="isLoading">
+        <ion-icon slot="icon-only" name="refresh"></ion-icon>
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <!-- Estado de carga -->
+  <div *ngIf="isLoading" class="ion-text-center ion-padding">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Cargando tu historial...</p>
+  </div>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+  <!-- Mensaje de error -->
+  <div *ngIf="!isLoading && errorMessage" class="ion-text-center ion-padding">
+    <ion-icon name="warning-outline" size="large" color="warning"></ion-icon>
+    <h3>{{ errorMessage }}</h3>
+    <p *ngIf="errorMessage === 'No hay intentos registrados aún'">
+      Completa algún quiz para ver tu historial aquí
+    </p>
+  </div>
+
+  <!-- Lista agrupada por quizzes -->
+  <ion-list *ngIf="!isLoading && quizGroups.length > 0">
+    <div *ngFor="let group of quizGroups">
+      <!-- Encabezado del grupo -->
+      <ion-item button (click)="toggleQuizAttempts(group)" detail>
+        <ion-label>
+          <h2>{{ group.quizName }}</h2>
+          <p>ID: {{ group.quizId }}</p>
+          <p>{{ group.attemptCount }} intento{{ group.attemptCount !== 1 ? 's' : '' }}</p>
+        </ion-label>
+        <ion-badge slot="end" color="primary">
+          {{ group.attemptCount }}
+        </ion-badge>
+        <ion-icon 
+          slot="end" 
+          [name]="group.showAttempts ? 'chevron-up' : 'chevron-down'">
+        </ion-icon>
+      </ion-item>
+
+      <!-- Intentos desplegables -->
+      <div *ngIf="group.showAttempts">
+        <ion-item-sliding *ngFor="let attempt of group.attempts">
+          <ion-item button (click)="toggleAttemptDetails(attempt)">
+            <ion-label>
+              <h3>{{ attempt.date | date:'medium' }}</h3>
+              <ion-chip [color]="attempt.scorePercentage >= 60 ? 'success' : 'warning'">
+                <ion-label>
+                  {{ attempt.scorePercentage }}% ({{ attempt.score }} pts)
+                </ion-label>
+              </ion-chip>
+              <p>
+                <ion-badge color="primary">
+                  {{ attempt.correctAnswers }}/{{ attempt.totalQuestions }} correctas
+                </ion-badge>
+              </p>
+            </ion-label>
+            <ion-icon 
+              slot="end" 
+              [name]="attempt.showDetails ? 'chevron-up' : 'chevron-down'">
+            </ion-icon>
+          </ion-item>
+
+          <!-- Detalles de preguntas/respuestas -->
+          <div *ngIf="attempt.showDetails" class="attempt-details">
+            <ion-item *ngFor="let question of attempt.questions" lines="none">
+              <ion-label class="question-detail">
+                <h3>{{ question.text }}</h3>
+                <p>Tu respuesta: <span [class.correct]="question.isCorrect" [class.incorrect]="!question.isCorrect">
+                  {{ question.userAnswer }}
+                </span></p>
+                <p *ngIf="!question.isCorrect">Respuesta correcta: {{ question.correctAnswer }}</p>
+                <p>Tiempo: {{ question.timeSpent }}s | Puntos: {{ question.pointsEarned }}</p>
+              </ion-label>
+            </ion-item>
+          </div>
+
+          <ion-item-options side="end">
+            <ion-item-option color="danger" (click)="deleteAttempt(attempt.id, $event)">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+      </div>
+    </div>
+  </ion-list>
 </ion-content>
