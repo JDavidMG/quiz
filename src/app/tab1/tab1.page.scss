@@ -1,33 +1,82 @@
-/* Estilos para mejorar la apariencia */
+/* Estilos generales */
 ion-item {
-    --padding-start: 16px;
-    --padding-end: 16px;
-    --min-height: 80px;
-  }
+  --padding-start: 16px;
+  --padding-end: 16px;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+}
+
+/* Estilos para los grupos de quizzes */
+.quiz-group {
+  margin-bottom: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   
-  ion-chip {
-    margin-top: 8px;
-    margin-bottom: 8px;
-  }
-  
-  .empty-state {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 60vh;
+  ion-item {
+    --background: var(--ion-color-light);
+    --border-radius: 8px;
     
-    ion-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      opacity: 0.5;
+    h2 {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    
+    p {
+      font-size: 0.9rem;
+      color: var(--ion-color-medium);
     }
   }
+}
+
+/* Estilos para los jugadores */
+.players-details {
+  width: 100%;
+  background: var(--ion-color-light-shade);
+  padding: 8px 0;
+  border-radius: 0 0 8px 8px;
   
-  .loading-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 50vh;
+  ion-item {
+    --background: transparent;
+    --padding-start: 16px;
+    --padding-end: 16px;
+    --min-height: 72px;
+    
+    h3 {
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    
+    p {
+      margin: 4px 0;
+      font-size: 0.8em;
+      color: var(--ion-color-medium);
+    }
   }
+}
+
+.highlight {
+  --background: rgba(var(--ion-color-primary-rgb), 0.1);
+  border-left: 3px solid var(--ion-color-primary);
+}
+
+/* Estilos para los badges de posición */
+ion-badge[color="primary"] {
+  font-weight: bold;
+}
+
+/* Estilos para los iconos */
+ion-icon[slot="end"] {
+  color: var(--ion-color-medium);
+}
+
+/* Estilos para los chips de puntuación */
+ion-chip {
+  margin: 4px 0;
+}
