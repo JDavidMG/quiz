@@ -1,6 +1,16 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Ranking Global</ion-title>
+    <!-- Botón izquierdo -->
+    <ion-buttons slot="start">
+      <ion-button (click)="goToLogin()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    
+    <!-- Título centrado -->
+    <ion-title class="centered-title">Ranking Global</ion-title>
+    
+    <!-- Botón derecho -->
     <ion-buttons slot="end">
       <ion-button (click)="loadAllRankings()" [disabled]="isLoading">
         <ion-icon slot="icon-only" name="refresh"></ion-icon>

@@ -16,6 +16,7 @@ import { Auth } from '@angular/fire/auth';
 import { IonicModule, AlertController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { refresh, trash, timeOutline, warningOutline, chevronUp, chevronDown } from 'ionicons/icons';
+import { Router } from '@angular/router';
 
 interface Question {
   text: string;
@@ -67,11 +68,15 @@ export class Tab3Page implements OnInit {
   constructor(
     private firestore: Firestore,
     private auth: Auth,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private router: Router
+
   ) {
     addIcons({ refresh, trash, timeOutline, warningOutline, chevronUp, chevronDown });
   }
-
+  goToLogin() {
+    this.router.navigate(['/authentication/login']);
+  }
   async ngOnInit() {
     await this.loadQuizHistory();
   }

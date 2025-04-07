@@ -1,9 +1,15 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>Quizzes Disponibles</ion-title>
+    <!-- Botón izquierdo -->
+    <ion-buttons slot="start">
+      <ion-button (click)="goToLogin()">
+        <ion-icon slot="icon-only" name="log-out"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <!-- Título centrado -->
+    <ion-title class="centered-title">Quizzes Disponibles</ion-title>
   </ion-toolbar>
 </ion-header>
-
 <ion-content [fullscreen]="true">
   <ion-list>
     <ion-item *ngFor="let quiz of quizzes$ | async">

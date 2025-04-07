@@ -105,3 +105,17 @@
       margin-right: 4px;
     }
   }
+  /* En tu archivo .scss correspondiente */
+.custom-toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  ion-title {
+    position: absolute;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 0 60px; /* Ajusta según el tamaño de tus botones */
+  }
+}

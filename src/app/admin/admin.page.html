@@ -1,9 +1,13 @@
 <ion-header>
-  <ion-toolbar color="primary">
+  <ion-toolbar color="primary" class="custom-toolbar">
+    <ion-buttons slot="start">
+    <ion-button (click)="goToLogin()">
+      <ion-icon slot="icon-only" name="log-out"></ion-icon>
+    </ion-button>
+  </ion-buttons>
     <ion-title>Administrador de Quizzes</ion-title>
-    
-    <!-- Botón de descarga a la derecha -->
     <ion-buttons slot="end">
+      
       <ion-button (click)="downloadTemplate()">
         <ion-icon slot="icon-only" name="download"></ion-icon>
       </ion-button>

@@ -41,11 +41,13 @@ interface QuizQuestion {
   ]
 })
 export class AdminPage {
+  
   quizData: QuizData | null = null;
   showQuestions = false;
   expandedQuestions: boolean[] = [];
 
   constructor(
+
     private firestore: Firestore,
     private alertController: AlertController,
     private router: Router
@@ -54,7 +56,9 @@ export class AdminPage {
   navigateToOtherPage() {
     this.router.navigate(['/authentication/viedel']);
   }
-
+  goToLogin() {
+    this.router.navigate(['/authentication/login']);
+  }
   async onFileChange(event: any) {
     const file = event.target.files[0];
     if (!file) return;

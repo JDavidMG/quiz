@@ -22,6 +22,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 // Importa todos los componentes de Ionic que necesitas
 import {
@@ -90,7 +91,8 @@ export class Tab1Page implements OnInit, OnDestroy {
   constructor(
     private firestore: Firestore,
     private auth: Auth,
-    private alertCtrl: AlertController
+    private alertCtrl: AlertController,
+    private router: Router
   ) {
     addIcons({ 
       refresh, 
@@ -104,7 +106,9 @@ export class Tab1Page implements OnInit, OnDestroy {
   async ngOnInit() {
     await this.loadAllRankings();
   }
-
+  goToLogin() {
+    this.router.navigate(['/authentication/login']);
+  }
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
