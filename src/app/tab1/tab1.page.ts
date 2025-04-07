@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { 
   Firestore, 
   collection, 
@@ -20,6 +20,8 @@ import {
 } from 'ionicons/icons';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 // Importa todos los componentes de Ionic que necesitas
 import {
@@ -78,11 +80,12 @@ interface QuizGroup {
     IonChip
   ]
 })
-export class Tab1Page implements OnInit {
+export class Tab1Page implements OnInit, OnDestroy {
   quizGroups: QuizGroup[] = [];
   isLoading = true;
   errorMessage = '';
   currentUserId: string | null = null;
+  private destroy$ = new Subject<void>();
 
   constructor(
     private firestore: Firestore,
@@ -102,7 +105,15 @@ export class Tab1Page implements OnInit {
     await this.loadAllRankings();
   }
 
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   async loadAllRankings() {
+    // Evitar múltiples llamadas simultáneas
+    if (this.isLoading && this.quizGroups.length > 0) return;
+    
     this.isLoading = true;
     this.errorMessage = '';
     this.quizGroups = [];
@@ -111,7 +122,10 @@ export class Tab1Page implements OnInit {
     this.currentUserId = user?.uid || null;
 
     try {
-      // Obtener todos los quizzes primero
+      // Usar un Map para evitar duplicados
+      const uniqueGroups = new Map<string, QuizGroup>();
+
+      // Obtener todos los quizzes
       const quizzesSnapshot = await getDocs(collection(this.firestore, 'quizzes'));
       const quizzes = quizzesSnapshot.docs.map(doc => ({
         id: doc.id,
@@ -141,17 +155,21 @@ export class Tab1Page implements OnInit {
         });
 
         if (players.length > 0) {
-          this.quizGroups.push({
-            quizId: quiz.id,
-            quizName: quiz.name,
-            players: players,
-            showPlayers: false,
-            playerCount: players.length
-          });
+          const groupKey = quiz.id; // Clave única
+          if (!uniqueGroups.has(groupKey)) {
+            uniqueGroups.set(groupKey, {
+              quizId: quiz.id,
+              quizName: quiz.name,
+              players: players,
+              showPlayers: false,
+              playerCount: players.length
+            });
+          }
         }
       }
 
-      // Ordenar grupos por nombre de quiz
+      // Convertir a array y ordenar
+      this.quizGroups = Array.from(uniqueGroups.values());
       this.quizGroups.sort((a, b) => a.quizName.localeCompare(b.quizName));
 
       if (this.quizGroups.length === 0) {
@@ -160,6 +178,7 @@ export class Tab1Page implements OnInit {
     } catch (error) {
       console.error('Error cargando rankings:', error);
       this.errorMessage = 'Error al cargar los rankings';
+      this.presentErrorAlert(this.errorMessage);
     } finally {
       this.isLoading = false;
     }
@@ -192,6 +211,9 @@ export class Tab1Page implements OnInit {
   }
 
   async ionViewWillEnter() {
-    await this.loadAllRankings();
+    // Solo recargar si no hay datos o si hay un error
+    if (this.quizGroups.length === 0 || this.errorMessage) {
+      await this.loadAllRankings();
+    }
   }
 }
